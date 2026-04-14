@@ -1,31 +1,3 @@
----
-  title: "VTPEH 6270 - Check Point 04"
-subtitle: "Data Simulation"
-author: "Philip Aquila Salvatore Tapan Dahal"
-date: "2026-03-05"
-output: 
-  pdf_document:
-  toc: true
-toc_depth: 1
-number_sections: true
-latex_engine: xelatex
-editor_options:
-  chunck_output_type: console
-urlcolor: blue
----
-  
-  ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
-# Objective and Approach
-## Specific Objective
-How does non-critical food safety violations vary by county in New York State?
-  
-  ## Data Description
-  
-  ```{r, results='hide', message=FALSE}
-
 setwd("C:/Users/Lenovo/OneDrive/Documents/Serba-Serbi Kuliah di Ithaca/Pekuliahan/Semester 2/Data Analysis with R/Checkpoint 4")
 Data_Violations <- read.csv("Food_Service_Establishment__Last_Inspection_20260205.csv")
 library(dplyr)
@@ -59,14 +31,7 @@ Data_County_Renamed <- Data_Violations_County %>%
 head(Data_County_Renamed)
 str(Data_County_Renamed)
 names(Data_County_Renamed)
-#Because I only want to compare the association between number of restaurant 
-#non critical violations to the counties in New York State, I just keep 5 variables 
-#which are Facility, Total Critical Violations, Total Critical Violations 
-#Not Corrected, Total Noncritical Violations, and County
-#I renamed every numerical variables to make it shorter
-#Total Critical Violations becomes Critical, Total Critical Not Corrected
-#becomes Critical_Not_Corrected, and Total Noncritical Violations becomes 
-#Non_Critical
+
 library(purrr)
 library(tibble)
 library(tidyr)
@@ -83,19 +48,9 @@ table_data <- data.frame(
   Class = c("Character", "Integer", "Integer", "Integer", "Character")
 )
 
-```
-
-```{r, results='asis'}
-
 kbl(table_data[1:5,],
     booktabs = TRUE, caption = "Variable Description") %>%
   kable_styling(latex_options = c("striped", "scale_down"))
-```
-
-
-## Data Visualization
-
-```{r, results='hide', message=FALSE}
 
 Data_County_Renamed %>%
   filter(COUNTY %in% c("CORTLAND", "WESTCHESTER", "ST LAWRENCE", 
@@ -117,10 +72,9 @@ Data_County_Renamed %>%
     plot.caption = element_text(size = 6, hjust = 0, face = "italic"),
     legend.position = "none"
   )
-#Violin plot comparing counties with the highest mean and median to the lowest one
 
 range(as.Date(Data_Violations$LAST.INSPECTED, format = "%m/%d/%Y"), na.rm = TRUE)
-#The time frame is 2007-2026
+
 
 Data_County_Renamed %>%
   group_by(COUNTY) %>%
@@ -147,10 +101,6 @@ Data_County_Renamed %>%
     plot.caption = element_text(size = 6, hjust = 0, face = "italic"),
     legend.position = "none"
   )
-#The trend is more restaurants, more non-critical food safety violations
-
-```
-````{r boxplot, message=FALSE, warning=FALSE, fig.width=6, fig.height=9, fig.align='center'}
 
 ggplot(Data_County_Renamed, aes(x = COUNTY, y = Non_Critical)) +
   geom_boxplot() +
@@ -170,16 +120,6 @@ ggplot(Data_County_Renamed, aes(x = COUNTY, y = Non_Critical)) +
     plot.title = element_text(size = 8),
     plot.caption = element_text(size = 6, hjust = 0, face = "italic")
   )
-
-````
-
-## Description of Plausible Relationships
-In almost every counties, non-critical food safety violations following right-skewed distribution-most restaurants have zero or very little amount of violations, but few restaurants that have a lot of violations were pulling the mean higher which happened in most of the counties. This tells us that more about systemic characteristic of food safety violations instead of county-specific phenomenon.
-
-
-## Parameters of Interest
-
-```{r, results='asis'}
 
 library(gt)
 
@@ -225,15 +165,6 @@ parameters_table %>%
     Description ~ px(300)
   )
 
-```
-
-# Simulation
-## Simulation Basis
-
-```{r, results='hide', message=FALSE, warning=FALSE}
-set.seed(123)
-
-# Define counties and their parameters based on real data
 counties <- c("ALBANY", "ALLEGANY", "BROOME", "CATTARAUGUS", "CAYUGA",
               "CHAUTAUQUA", "CHEMUNG", "CHENANGO", "CLINTON", "COLUMBIA",
               "CORTLAND", "DELAWARE", "DUTCHESS", "ESSEX", "FRANKLIN",
@@ -246,7 +177,7 @@ counties <- c("ALBANY", "ALLEGANY", "BROOME", "CATTARAUGUS", "CAYUGA",
               "SULLIVAN", "TIOGA", "TOMPKINS", "ULSTER", "WARREN",
               "WASHINGTON", "WAYNE", "WESTCHESTER", "WYOMING", "YATES")
 
-# Real observed medians and IQRs from your data
+
 median_violations <- c(1, 1, 1, 0, 0, 1, 0, 2, 0, 1,
                        4, 1, 1, 2, 1, 0, 0, 3, 2, 0,
                        2, 1, 1, 1, 2, 1, 1, 0, 1, 1,
@@ -261,7 +192,7 @@ iqr_violations <- c(2, 1, 3, 2, 1, 2, 1, 4, 1, 2.5,
                     1, 2, 2, 5, 1, 4, 2, 1, 2, 3,
                     3, 1, 5, 2, 1)
 
-# Number of restaurants per county based on real data
+
 n_restaurants <- c(524, 126, 630, 331, 223, 448, 246, 119, 196, 159,
                    160, 144, 404, 218, 146, 157, 208, 191, 38, 182,
                    332, 83, 174, 295, 2655, 119, 1636, 1074, 663, 1901,
@@ -269,15 +200,10 @@ n_restaurants <- c(524, 126, 630, 331, 223, 448, 246, 119, 196, 159,
                    60, 82, 108, 253, 312, 334, 115, 275, 468, 358,
                    113, 183, 1326, 63, 59)
 
-# Simulate data using negative binomial distribution
-# which naturally produces right-skewed count data
 simulated_data <- do.call(rbind, lapply(seq_along(counties), function(i) {
-  
-  # Calculate size and mu parameters from median and IQR
+
   mu <- median_violations[i] + (iqr_violations[i] * 0.5)
   size <- max(0.5, mu / (iqr_violations[i] * 0.3))
-  
-  # Simulate non-critical violations using negative binomial
   violations <- rnbinom(
     n = n_restaurants[i],
     mu = max(0.1, mu),
@@ -290,11 +216,9 @@ simulated_data <- do.call(rbind, lapply(seq_along(counties), function(i) {
   )
 }))
 
-# Preview the simulated data
 head(simulated_data)
 str(simulated_data)
 
-# Compare real vs simulated means
 simulated_data %>%
   group_by(COUNTY) %>%
   summarise(Simulated_Mean = round(mean(Non_Critical_Simulated), 2)) %>%
@@ -305,16 +229,8 @@ simulated_data %>%
     by = "COUNTY"
   )
 
-```
-
-## Simulation Output
-
-```{r, results='hide', message=FALSE, warning=FALSE}
-
-#install.packages("moments")
 library(moments)
 
-# Stratified Summary Statistics for Simulated Data
 simulated_summary <- simulated_data %>%
   group_by(COUNTY) %>%
   summarise(
@@ -332,20 +248,15 @@ simulated_summary <- simulated_data %>%
     Missing = sum(is.na(Non_Critical_Simulated))
   )
 
-# Preview the summary
+
 print(simulated_summary)
 
-```
-
-## Simulation Function
-
-```{r, results='hide', message=FALSE, warning=FALSE}
 
 simulate_violations <- function(effect_size = 1.0, 
                                 noise = 0.3, 
                                 sample_size = 1.0) {
   
-  # County parameters based on real data
+ 
   counties <- c("ALBANY", "ALLEGANY", "BROOME", "CATTARAUGUS", "CAYUGA",
                 "CHAUTAUQUA", "CHEMUNG", "CHENANGO", "CLINTON", "COLUMBIA",
                 "CORTLAND", "DELAWARE", "DUTCHESS", "ESSEX", "FRANKLIN",
@@ -379,19 +290,16 @@ simulate_violations <- function(effect_size = 1.0,
                      60, 82, 108, 253, 312, 334, 115, 275, 468, 358,
                      113, 183, 1326, 63, 59)
   
-  # Apply sample_size multiplier to n_restaurants
-  # effect_size scales the median violations
-  # noise controls overdispersion
+ 
   simulated_data <- do.call(rbind, lapply(seq_along(counties), function(i) {
     
-    # effect_size scales the mean violations up or down
+    
     mu <- (median_violations[i] + (iqr_violations[i] * 0.5)) * effect_size
     
-    # noise controls the size parameter of negative binomial
-    # lower noise = more overdispersion = more variability
+    
     size <- max(0.5, mu / (iqr_violations[i] * noise))
     
-    # sample_size scales the number of restaurants
+    
     n <- max(1, round(n_restaurants[i] * sample_size))
     
     violations <- rnbinom(
@@ -406,7 +314,7 @@ simulate_violations <- function(effect_size = 1.0,
     )
   }))
   
-  # Generate stratified summary statistics
+
   simulated_summary <- simulated_data %>%
     group_by(COUNTY) %>%
     summarise(
@@ -430,40 +338,26 @@ simulate_violations <- function(effect_size = 1.0,
   ))
 }
 
-# Default simulation (mirrors real data)
 result <- simulate_violations(effect_size = 1.0, noise = 0.3, sample_size = 1.0)
 
-# Access simulated data
 result$simulated_data
 
-# Access summary statistics
 result$simulated_summary
 
-# Example: higher effect, more noise, half the sample size
 result2 <- simulate_violations(effect_size = 1.5, noise = 0.5, sample_size = 0.5)
 
-# Example: lower effect, less noise, double the sample size
 result3 <- simulate_violations(effect_size = 0.5, noise = 0.1, sample_size = 2.0)
 
-```
-
-## Simulation Automation
-
-```{r, results='hide', message=FALSE, warning=FALSE}
-
-# Define parameter grids
 effect_sizes <- c(0.25, 0.50, 0.75, 1.00, 1.25, 1.50, 1.75, 2.00, 2.50, 3.00)
 sample_sizes <- c(0.10, 0.25, 0.50, 0.75, 1.00, 1.25, 1.50, 2.00, 2.50, 3.00)
 noise_levels <- c(0.1, 0.3, 0.5)
 
-# Create all combinations
 param_grid <- expand.grid(
   effect_size = effect_sizes,
   sample_size = sample_sizes,
   noise = noise_levels
 )
 
-# Run simulation for all combinations
 set.seed(123)
 simulation_results <- vector("list", nrow(param_grid))
 
@@ -482,30 +376,20 @@ for (i in 1:nrow(param_grid)) {
   )
 }
 
-# Name each run for easy access
 names(simulation_results) <- paste0(
   "effect_", param_grid$effect_size,
   "_sample_", param_grid$sample_size,
   "_noise_", param_grid$noise
 )
 
-# Check how many simulations were run
 cat("Total simulations run:", length(simulation_results), "\n")
 
-# Preview first simulation parameters and summary
 cat("\nFirst simulation parameters:\n")
 print(simulation_results[[1]]$parameters)
 
 cat("\nFirst simulation summary (first 5 counties):\n")
 print(head(simulation_results[[1]]$output$simulated_summary, 5))
 
-```
-
-# Visualization
-
-```{r, results='asis'}
-
-# Extract mean violations across all simulations
 heatmap_data <- do.call(rbind, lapply(seq_along(simulation_results), function(i) {
   params <- simulation_results[[i]]$parameters
   summary <- simulation_results[[i]]$output$simulated_summary
@@ -520,7 +404,6 @@ heatmap_data <- do.call(rbind, lapply(seq_along(simulation_results), function(i)
   )
 }))
 
-# Plot heatmap
 ggplot(heatmap_data, aes(x = factor(effect_size), 
                          y = factor(sample_size), 
                          fill = mean_violations)) +
@@ -546,22 +429,3 @@ ggplot(heatmap_data, aes(x = factor(effect_size),
     legend.text = element_text(size = 6),
     plot.caption = element_text(size = 6, hjust = 0, face = "italic")
   )
-
-```
-
-# Interpretation
-
-Effect Size
-Effect size is clearly the dominant parameter driving mean non-critical violations across all simulations. Moving from left to right along the x-axis, the color consistently darkens from light pink to deep red across all three noise panels and all sample sizes. This confirms that as effect size increases from 0.25 to 3.00, mean violations increase proportionally and predictably regardless of other parameter settings.
-
-Sample Size
-Sample size had virtually no effect on mean violations. Looking down each column within any noise panel, the colors and numbers remain nearly identical across all sample sizes from 0.10 to 3.00. This is expected behavior — changing the number of restaurants per county does not change the underlying violation rate, only the precision of the estimate. The rows are remarkably consistent, confirming that sample size is not a meaningful driver of mean violations in this simulation.
-
-Noise
-Comparing the three panels, noise level had minimal impact on mean violations as well. The three heatmaps look nearly identical in both color pattern and cell values, suggesting that noise primarily affects within-county variability rather than the overall mean. This is consistent with the negative binomial distribution used in the simulation, where the noise parameter controls overdispersion rather than the central tendency.
-
-Overall Conclusion
-The simulations demonstrate that effect size alone determines the magnitude of non-critical violations across counties, while sample size and noise influence precision and spread respectively but not the mean. This reinforces that county-level differences are the primary driver of non-critical restaurant violations in New York State.
-
-# AI Use Disclosure Statement
-This document was generated using Claude to generate the original code. The code was then reviewed and adjusted.

@@ -1,7 +1,6 @@
 **Project Title and Brief Description**
 # R-Homework
-VTPEH 6270 - Check Point 6 - "Statistical Analyses"
-
+VTPEH 6270 - Final Report
 **Author and Affiliations**
 Philip Aquila Salvatore Tapan Dahal, Cornell University, Master of Public Health program, Food System and Health concentration
 
@@ -13,9 +12,10 @@ How does non critical food safety violations vary by county in New York State?
 
 **Data Source, Description, and Links to Report**
 The data that was analysed is about violations of food safety that happen in restaurants around New York State. This data was provided by New York State Department of Health and was last updated in February 1, 2026. The data was collected in all over New York State. It was updated every month since January 29, 2013. The number of observations in this data set is approximately 21,745. The source of this data is in this link https://health.data.ny.gov/Health/Food-Service-Establishment-Last-Inspection/cnih-y5dw/about_data
+The link to the Shiny App: https://pastd.shinyapps.io/testapp/
 
 **AI Tool Disclosure**
-I did not use AI for this Checkpoint
+This document was generated using Claude to generate the original code. The code was then reviewed and adjusted.
 
 **References**
 1.	Harris KJ, DiPietro RB, Murphy KS, Rivera G. Critical Food Safety Violations in Florida: Relationship to Location and Chain vs. Non-Chain Restaurants. Int J Hosp Manag. 2014;38:57-64. doi:10.1016/j.ijhm.2013.12.005

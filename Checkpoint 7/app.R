@@ -1,5 +1,3 @@
-# ── Libraries ─────────────────────────────────────────────────────────────────
-library(shiny)
 library(leaflet)
 library(tigris)
 library(sf)
@@ -9,7 +7,6 @@ library(stringr)
 
 options(tigris_use_cache = TRUE)
 
-# ── Load and Prepare Data ─────────────────────────────────────────────────────
 Data_Violations <- read.csv("Food_Service_Establishment__Last_Inspection_20260205.csv")
 
 Data_Violations_Cleaned <- Data_Violations %>%
@@ -60,7 +57,6 @@ pal <- colorNumeric(
   na.color = "#cccccc"
 )
 
-# ── UI ────────────────────────────────────────────────────────────────────────
 ui <- fluidPage(
   tags$head(tags$style(HTML("
     body { font-family: 'Georgia', serif; background-color: #1a1a2e; color: #eaeaea; }
@@ -106,7 +102,6 @@ ui <- fluidPage(
        Color scale: cold (blue) = fewer violations, hot (red) = more violations")
 )
 
-# ── Server ────────────────────────────────────────────────────────────────────
 server <- function(input, output, session) {
   
   output$map <- renderLeaflet({

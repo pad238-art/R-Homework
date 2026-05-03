@@ -1,43 +1,3 @@
----
-title: "VTPEH 6270 - Final Report"
-subtitle: "Statistical Analyses"
-author: "Philip Aquila Salvatore Tapan Dahal"
-date: "2026-05-03"
-output: 
-  pdf_document:
-    toc: true
-    toc_depth: 1
-    number_sections: true
-editor_options:
-  chunck_output_type: console
-urlcolor: blue
----
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
-
-# Introduction
-## Links
-Shiny App: https://pastd.shinyapps.io/testapp/
-
-GitHub Repository:https://github.com/pad238-art/R-Homework
-
-Data Source:https://health.data.ny.gov/Health/Food-Service-Establishment-Last-Inspection/cnih-y5dw/about_data
-
-## Research Question
-How does non-critical food safety violations vary by county in New York State?
-
-## Scientific Plausibility and Context
-County where the inspector from health department come more often to inspect the restaurants there will have more violations.¹ Restaurant inspector from health department will visit more often to counties that are more populated and have more restaurants¹ Other research showed that restaurant violations also happened more in regions with low economic status.² Low economic status usually also have low education level which can cause the restaurant workers to have less knowledge in proper way to handle food.² Other research also stated that the location of the restaurants can also relate to the violations, especially if it is located not within walking distance of a healthy source of food such as grocery stores.³
-
-# Material and Methods
-## Data
-The data were collected by New York State Department of Health. They got the data by performing restaurant inspection all over New York State (excluding New York City). This data was updated every month since January 29, 2013 and it was updated the last in February 1, 2026.
-
-```{r, results='hide', message=FALSE, warning=FALSE}
-
 library(dplyr)
 library(janitor)
 library(knitr)
@@ -63,10 +23,7 @@ Data_Violations_County <- Data_Violations_Cleaned %>%
          -NYS.HEALTH.OPERATION.ID, -INSPECTION.TYPE, -INSPECTION.COMMENTS, 
          -FOOD.SERVICE.FACILITY.STATE, -Location1, -PERM..OPERATOR.LAST.NAME,
          -PERM..OPERATOR.FIRST.NAME)
-#Because I only want to compare the association between number of restaurant 
-#non critical violations to the counties in New York State, I just keep 5 
-#variables which are Facility, Total Critical Violations, Total Critical 
-#Violations Not Corrected, Total Noncritical Violations, and County
+
 Data_County_Renamed <- Data_Violations_County %>%
   rename(Critical = TOTAL...CRITICAL.VIOLATIONS, Critical_Not_Corrected = 
            TOTAL..CRIT...NOT.CORRECTED., Non_Critical = 
@@ -74,10 +31,7 @@ Data_County_Renamed <- Data_Violations_County %>%
 head(Data_County_Renamed)
 str(Data_County_Renamed)
 names(Data_County_Renamed)
-#I renamed every numerical variables to make it shorter
-#Total Critical Violations becomes Critical, Total Critical Not Corrected
-#becomes Critical_Not_Corrected, and Total Noncritical Violations becomes 
-#Non_Critical
+
 library(purrr)
 library(tibble)
 library(tidyr)
@@ -97,25 +51,15 @@ table_data <- data.frame(
                   corrected", "Number of violations that are not critical",
                   "the county where the restaurant located")
 )
-```
 
-```{r, results='asis'}
-#This is the table to explain what each variables mean
 kbl(table_data[1:5,],
     booktabs = TRUE, caption = "Variable Description") %>%
   kable_styling(latex_options = c("striped", "scale_down"))
-```
 
-## Statistical Analyses
-
-```{r, message=FALSE, warning=FALSE}
-
-#install.packages("gtsummary")
 library(gtsummary)
 library(gt)
 library(dplyr)
 
-# Create prevalence variable
 Data_County_Renamed <- Data_County_Renamed %>%
   group_by(COUNTY) %>%
   mutate(
@@ -123,7 +67,7 @@ Data_County_Renamed <- Data_County_Renamed %>%
     Prevalence = Non_Critical / N_Restaurants
   ) %>%
   ungroup()
-# Summary table
+
 Data_County_Renamed %>%
   group_by(COUNTY) %>%
   summarise(
@@ -136,31 +80,13 @@ Data_County_Renamed %>%
     Missing = sum(is.na(Prevalence))
   )
 
-# Kruskal-Wallis
 kruskal.test(Prevalence ~ COUNTY, data = Data_County_Renamed)
 
-# Dunn test
 library(dunn.test)
 dunn_result <- dunn.test(Data_County_Renamed$Prevalence,
                           g = Data_County_Renamed$COUNTY,
                           method = "bonferroni",
                           altp = TRUE)
-
-```
-
-Summary Statistics
-The prevalence of non-critical violations varies substantially across counties in New York State. Rather than comparing raw violation counts, prevalence accounts for the number of restaurants in each county, making comparisons more meaningful. Counties with higher prevalence have more violations relative to their number of restaurants, suggesting genuine differences in food safety compliance rather than simply having more establishments.
-
-Kruskal-Wallis Test
-The Kruskal-Wallis test revealed a statistically significant difference in non-critical violation prevalence across counties (Chi-Squared = 4466.5, df = 54, p < 0.001). This indicates that the rate of non-critical violations per restaurant differs significantly across New York State counties, even after accounting for the number of restaurants in each county.
-
-Post-hoc Dunn Test
-The post-hoc Dunn test with Bonferroni correction revealed 753 out of 1,485 pairwise county comparisons were statistically significant (p < 0.05), suggesting that the differences in violation prevalence are widespread across counties rather than being driven by just a few outliers.
-
-# Results
-## Visualization
-
-```{r, message=FALSE, warning=FALSE}
 
 Data_County_Renamed %>%
   filter(COUNTY %in% c("CORTLAND", "WESTCHESTER", "ST LAWRENCE", 
@@ -182,10 +108,8 @@ Data_County_Renamed %>%
     plot.caption = element_text(size = 6, hjust = 0, face = "italic"),
     legend.position = "none"
   )
-#Violin plot comparing counties with the highest mean and median to the lowest one
 
 range(as.Date(Data_Violations$LAST.INSPECTED, format = "%m/%d/%Y"), na.rm = TRUE)
-#The time frame is 2007-2026
 
 Data_County_Renamed %>%
   group_by(COUNTY) %>%
@@ -212,10 +136,6 @@ Data_County_Renamed %>%
     plot.caption = element_text(size = 6, hjust = 0, face = "italic"),
     legend.position = "none"
   )
-#The trend is more restaurants, more non-critical food safety violations
-
-```
-````{r boxplot, message=FALSE, warning=FALSE, fig.width=6, fig.height=9, fig.align='center'}
 
 ggplot(Data_County_Renamed, aes(x = COUNTY, y = Non_Critical)) +
   geom_boxplot() +
@@ -235,19 +155,3 @@ ggplot(Data_County_Renamed, aes(x = COUNTY, y = Non_Critical)) +
     plot.title = element_text(size = 8),
     plot.caption = element_text(size = 6, hjust = 0, face = "italic")
   )
-
-````
-
-## Statistical Analyses
-In almost every county, non-critical food safety violations follow a right-skewed distribution — most restaurants have zero or very few violations, but a small number of restaurants with high violation counts pull the mean upward. This pattern is consistent across most counties, which may suggest a systemic characteristic of food safety violations. However, since the Kruskal-Wallis test and post-hoc Dunn test confirm statistically significant differences in violation prevalence across counties, county-level factors likely also play a role. The right-skewed pattern within counties and the significant between-county differences are not mutually exclusive — both systemic and county-specific factors may contribute to the observed distribution. Further analysis, such as examining inspection frequency or socioeconomic indicators by county, would be needed to more definitively distinguish between these explanations.
-
-# Conclusions
-The result on the scatter plot shows us that the trend is more restaurants in the county, more non critical restaurant violations that the county would have. This is align with the result that Harris, et al. found where they mentioned that restaurant inspector from the health department will come more to inspect in places that have a lot of people and restaurants in it, hence the higher food safety violations they will find.¹ Further research can also be done to analyze if it has relationship with economic and education status like what Sha, et al. found in their research where more restaurant violations found in places populated with people that have lower economic and education.²
-
-# AI Use Disclosure Statement
-This document was generated using Claude to generate the original code. The code was then reviewed and adjusted.
-
-# References
-1.	Harris KJ, DiPietro RB, Murphy KS, Rivera G. Critical Food Safety Violations in Florida: Relationship to Location and Chain vs. Non-Chain Restaurants. Int J Hosp Manag. 2014;38:57-64. doi:10.1016/j.ijhm.2013.12.005
-2.	Sha Y, Song X, Zhan J, Lu L, Zhang Q, Lu Y. Regional Character, Restaurant Size, and Food Safety Risk: Evidence from Food Safety Violation Data in Gansu Province, China. J Food Prot. 2020;83(4):677-685. doi:10.4315/0362-028X.JFP-19-457
-3.	Parsa HG, Kreeger JC, van der Rest JP, Xie L “Karen”, Lamb J. Why Restaurants Fail? Part V: Role of Economic Factors, Risk, Density, Location, Cuisine, Health Code Violations and GIS Factors. Int J Hosp Tour Adm. 2021;22(2):142-167. doi:10.1080/15256480.2019.1598908
